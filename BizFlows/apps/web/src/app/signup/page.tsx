@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+
 import {
   ArrowLeft,
   ArrowRight,
@@ -83,6 +84,42 @@ export default function SignUpPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+
+    try {
+      const response = await fetch("http://localhost:3001/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          password
+        })
+      });
+
+
+      const data = await response.json();
+
+
+      if (!response.ok) {
+        alert(data.message || "Registration failed");
+        return;
+      }
+
+      alert("Registration successful!");
+      window.location.href = "/signin";
+      } catch (error) {
+        console.log("Could not connect to backend:", error);
+        alert("Could not connect to backend");
+      }
+    }
+  
 
   const validation = useMemo(() => {
     const hasLength = password.length >= 8;
@@ -206,8 +243,8 @@ export default function SignUpPage() {
               Or continue with email
               <span />
             </div>
-
-            <form className="signin-form signup-form" onSubmit={(event) => event.preventDefault()}>
+    
+            <form className="signin-form signup-form" onSubmit={handleSubmit}>
               <div className="name-row">
                 <label>
                   First name
