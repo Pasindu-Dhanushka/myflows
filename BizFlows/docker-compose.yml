@@ -1,16 +1,20 @@
 services:
   postgres:
     image: postgres:17
-    container_name: bizflows-postgres
+    container_name: bizflows-postgres-practice
     restart: unless-stopped
+
     environment:
       POSTGRES_DB: bizflows
       POSTGRES_USER: bizflows
       POSTGRES_PASSWORD: bizflows_dev
+
     ports:
-      - "5432:5432"
+      - "5433:5432"
+
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_practice_data:/var/lib/postgresql/data
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U bizflows -d bizflows"]
       interval: 5s
@@ -18,4 +22,4 @@ services:
       retries: 5
 
 volumes:
-  postgres_data:
+  postgres_practice_data:
