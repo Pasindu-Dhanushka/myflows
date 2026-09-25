@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-
 import {
   ArrowLeft,
   ArrowRight,
@@ -119,7 +118,7 @@ export default function SignUpPage() {
         alert("Could not connect to backend");
       }
     }
-  
+
 
   const validation = useMemo(() => {
     const hasLength = password.length >= 8;
@@ -243,7 +242,7 @@ export default function SignUpPage() {
               Or continue with email
               <span />
             </div>
-    
+
             <form className="signin-form signup-form" onSubmit={handleSubmit}>
               <div className="name-row">
                 <label>

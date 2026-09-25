@@ -22,7 +22,9 @@ body {
   margin: 0;
   background: var(--background);
   color: var(--text);
-  font-family: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", Inter, Arial, Helvetica, sans-serif;
+  font-family:
+    "Plus Jakarta Sans Variable", "Plus Jakarta Sans", Inter, Arial, Helvetica,
+    sans-serif;
   letter-spacing: 0;
   text-rendering: geometricPrecision;
   overflow-x: hidden;
@@ -87,7 +89,9 @@ a {
 .signin-link,
 .footer-inner nav a,
 .sales-link {
-  transition: color 180ms ease, opacity 180ms ease;
+  transition:
+    color 180ms ease,
+    opacity 180ms ease;
 }
 
 .main-nav a:hover,
@@ -122,7 +126,10 @@ a {
   height: 40px;
   border-radius: 18px;
   box-shadow: 0 10px 18px rgba(56, 100, 232, 0.16);
-  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
 }
 
 .primary-pill:hover {
@@ -135,7 +142,11 @@ a {
   min-height: 590px;
   padding: 88px 24px 48px;
   background:
-    radial-gradient(circle at 50% 100%, rgba(224, 232, 246, 0.78), transparent 34%),
+    radial-gradient(
+      circle at 50% 100%,
+      rgba(224, 232, 246, 0.78),
+      transparent 34%
+    ),
     linear-gradient(180deg, #f7faff 0%, #f3f6fb 100%);
 }
 
@@ -272,7 +283,9 @@ a {
   border-radius: 17px;
   background: #ffffff;
   box-shadow: 0 30px 70px rgba(20, 30, 50, 0.14);
-  transition: transform 220ms ease, box-shadow 220ms ease;
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease;
 }
 
 .browser-window:hover {
@@ -301,9 +314,15 @@ a {
   border-radius: 999px;
 }
 
-.window-dots .red { background: #f1665e; }
-.window-dots .yellow { background: #f2ba43; }
-.window-dots .green { background: #4cb95a; }
+.window-dots .red {
+  background: #f1665e;
+}
+.window-dots .yellow {
+  background: #f2ba43;
+}
+.window-dots .green {
+  background: #4cb95a;
+}
 
 .address-pill {
   position: absolute;
@@ -386,7 +405,9 @@ a {
   font-weight: 800;
   white-space: nowrap;
   box-shadow: 0 12px 24px rgba(20, 30, 50, 0.05);
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .workflow-node:hover {
@@ -539,12 +560,30 @@ a {
   transform: scale(1.06) rotate(-2deg);
 }
 
-.feature-icon.blue { color: #2f67f2; background: #edf6ff; }
-.feature-icon.purple { color: #7a42ec; background: #f3ecff; }
-.feature-icon.green { color: #3aaa56; background: #effcf2; }
-.feature-icon.sky { color: #35a7ec; background: #eef9ff; }
-.feature-icon.amber { color: #e58d22; background: #fff8e9; }
-.feature-icon.red { color: #e33e39; background: #fff0f1; }
+.feature-icon.blue {
+  color: #2f67f2;
+  background: #edf6ff;
+}
+.feature-icon.purple {
+  color: #7a42ec;
+  background: #f3ecff;
+}
+.feature-icon.green {
+  color: #3aaa56;
+  background: #effcf2;
+}
+.feature-icon.sky {
+  color: #35a7ec;
+  background: #eef9ff;
+}
+.feature-icon.amber {
+  color: #e58d22;
+  background: #fff8e9;
+}
+.feature-icon.red {
+  color: #e33e39;
+  background: #fff0f1;
+}
 
 .feature-card h3,
 .pricing-card h3 {
@@ -602,9 +641,15 @@ a {
   font-weight: 800;
 }
 
-.avatar.violet { background: linear-gradient(135deg, #4c6ef5, #773cea); }
-.avatar.teal { background: linear-gradient(135deg, #47b26a, #3b8ae6); }
-.avatar.orange { background: #dc6833; }
+.avatar.violet {
+  background: linear-gradient(135deg, #4c6ef5, #773cea);
+}
+.avatar.teal {
+  background: linear-gradient(135deg, #47b26a, #3b8ae6);
+}
+.avatar.orange {
+  background: #dc6833;
+}
 
 .person strong,
 .person span {
@@ -641,9 +686,15 @@ a {
 .pricing-card.popular {
   border: 2px solid var(--brand);
   background:
-    radial-gradient(circle at 15% 0%, rgba(255, 255, 255, 0.9), transparent 30%),
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(255, 255, 255, 0.9),
+      transparent 30%
+    ),
     #eff6ff;
-  box-shadow: 8px 0 0 rgba(56, 100, 232, 0.08), -8px 0 0 rgba(56, 100, 232, 0.08);
+  box-shadow:
+    8px 0 0 rgba(56, 100, 232, 0.08),
+    -8px 0 0 rgba(56, 100, 232, 0.08);
 }
 
 .popular-badge {
@@ -749,7 +800,11 @@ a {
   text-align: center;
   color: #ffffff;
   background:
-    radial-gradient(circle at 88% 15%, rgba(255, 255, 255, 0.16), transparent 22%),
+    radial-gradient(
+      circle at 88% 15%,
+      rgba(255, 255, 255, 0.16),
+      transparent 22%
+    ),
     linear-gradient(120deg, #24235d 0%, #3864e8 100%);
   box-shadow: 0 28px 70px rgba(40, 66, 160, 0.24);
 }
@@ -866,7 +921,11 @@ a {
   overflow: hidden;
   color: #ffffff;
   background:
-    radial-gradient(circle at 74% 18%, rgba(73, 89, 205, 0.42), transparent 34%),
+    radial-gradient(
+      circle at 74% 18%,
+      rgba(73, 89, 205, 0.42),
+      transparent 34%
+    ),
     linear-gradient(135deg, #171a49 0%, #202460 50%, #2b3f91 100%);
 }
 
@@ -876,7 +935,10 @@ a {
   pointer-events: none;
   content: "";
   opacity: 0.22;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.55) 1px, transparent 1px);
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.55) 1px,
+    transparent 1px
+  );
   background-size: 28px 28px;
 }
 
@@ -897,7 +959,9 @@ a {
   color: rgba(255, 255, 255, 0.72);
   font-size: 13px;
   font-weight: 750;
-  transition: color 180ms ease, transform 180ms ease;
+  transition:
+    color 180ms ease,
+    transform 180ms ease;
 }
 
 .signin-home-link:hover {
@@ -1116,7 +1180,11 @@ a {
   overscroll-behavior: contain;
   padding: 54px 42px 30px;
   background:
-    radial-gradient(circle at 82% 14%, rgba(56, 100, 232, 0.06), transparent 30%),
+    radial-gradient(
+      circle at 82% 14%,
+      rgba(56, 100, 232, 0.06),
+      transparent 30%
+    ),
     #ffffff;
 }
 
@@ -1200,7 +1268,11 @@ a {
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
 }
 
 .oauth-stack button {
@@ -1237,10 +1309,18 @@ a {
   height: 8px;
 }
 
-.microsoft-mark i:nth-child(1) { background: #f25022; }
-.microsoft-mark i:nth-child(2) { background: #7fba00; }
-.microsoft-mark i:nth-child(3) { background: #00a4ef; }
-.microsoft-mark i:nth-child(4) { background: #ffb900; }
+.microsoft-mark i:nth-child(1) {
+  background: #f25022;
+}
+.microsoft-mark i:nth-child(2) {
+  background: #7fba00;
+}
+.microsoft-mark i:nth-child(3) {
+  background: #00a4ef;
+}
+.microsoft-mark i:nth-child(4) {
+  background: #ffb900;
+}
 
 .email-divider {
   display: grid;
@@ -1294,7 +1374,10 @@ a {
   border-radius: 14px;
   background: #fbfcfe;
   color: #99a3b3;
-  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
 }
 
 .signin-input-wrap:focus-within {

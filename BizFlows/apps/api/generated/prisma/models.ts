@@ -10,4 +10,6 @@
  */
 export type * from './models/Role'
 export type * from './models/User'
+export type * from './models/AuthSession'
+export type * from './models/LoginAudit'
 export type * from './commonInputTypes'
