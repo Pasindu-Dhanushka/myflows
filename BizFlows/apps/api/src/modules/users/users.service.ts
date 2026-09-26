@@ -125,6 +125,7 @@ export class UsersService {
       },
       data: {
         revokedAt: new Date(),
+        revocationReason: 'USER_LOGOUT',
       },
     });
   }

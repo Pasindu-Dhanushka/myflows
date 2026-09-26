@@ -104,6 +104,7 @@ export const AuthSessionScalarFieldEnum = {
   expiresAt: 'expiresAt',
   createdAt: 'createdAt',
   revokedAt: 'revokedAt',
+  revocationReason: 'revocationReason',
   ipAddress: 'ipAddress',
   userAgent: 'userAgent'
 } as const

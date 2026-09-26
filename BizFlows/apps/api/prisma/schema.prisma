@@ -43,6 +43,7 @@ model AuthSession {
   expiresAt DateTime
   createdAt DateTime  @default(now())
   revokedAt DateTime?
+  revocationReason String?   @db.VarChar(50)
   ipAddress String?   @db.VarChar(64)
   userAgent String?   @db.VarChar(512)
 

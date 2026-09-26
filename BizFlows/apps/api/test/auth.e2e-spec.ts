@@ -151,6 +151,7 @@ describe('Authentication (e2e)', () => {
       where: { id: loginBody.session.id },
     });
     expect(revokedSession?.revokedAt).toBeInstanceOf(Date);
+    expect(revokedSession?.revocationReason).toBe('USER_LOGOUT');
 
     const audits = await prisma.loginAudit.findMany({
       where: { email },
