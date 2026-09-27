@@ -1,25 +1,31 @@
 services:
   postgres:
     image: postgres:17
-    container_name: bizflows-postgres-practice
+    container_name: bizflows-postgres
     restart: unless-stopped
-
     environment:
       POSTGRES_DB: bizflows
       POSTGRES_USER: bizflows
       POSTGRES_PASSWORD: bizflows_dev
-
     ports:
-      - "5433:5432"
-
+      - "5432:5432"
     volumes:
-      - postgres_practice_data:/var/lib/postgresql/data
-
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U bizflows -d bizflows"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+  mailpit:
+   image: axllent/mailpit:latest
+   container_name: bizflows-mailpit
+   environment:
+    MP_SMTP_BIND_ADDR: 0.0.0.0:1025
+    MP_UI_BIND_ADDR: 0.0.0.0:8025
+   ports:
+    - "1026:1025"
+    - "8025:8025"    
+
 volumes:
-  postgres_practice_data:
+  postgres_data:

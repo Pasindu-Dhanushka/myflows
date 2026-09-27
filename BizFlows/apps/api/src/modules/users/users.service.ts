@@ -105,6 +105,7 @@ export class UsersService {
         },
         user: {
           isActive: true,
+          isEmailVerified: true,
         },
       },
       include: {
@@ -125,8 +126,103 @@ export class UsersService {
       },
       data: {
         revokedAt: new Date(),
-        revocationReason: 'USER_LOGOUT',
       },
+    });
+  }
+
+  async createEmailVerificationToken(data: {
+    userId: string;
+    tokenHash: string;
+    expiresAt: Date;
+  }) {
+    return this.prisma.emailVerificationToken.create({
+      data: {
+        userId: data.userId,
+        tokenHash: data.tokenHash,
+        expiresAt: data.expiresAt,
+      },
+    });
+  }
+
+  async findEmailVerificationTokenByHash(tokenHash: string) {
+    return this.prisma.emailVerificationToken.findUnique({
+      where: {
+        tokenHash,
+      },
+      include: {
+        user: true,
+      },
+    });
+  }
+
+  async deleteEmailVerificationToken(id: string) {
+    await this.prisma.emailVerificationToken.deleteMany({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async deleteOtherUnusedEmailVerificationTokens(
+    userId: string,
+    keepTokenId: string,
+  ) {
+    await this.prisma.emailVerificationToken.deleteMany({
+      where: {
+        userId,
+        usedAt: null,
+        id: {
+          not: keepTokenId,
+        },
+      },
+    });
+  }
+
+  async verifyUserEmail(userId: string, tokenId: string) {
+    const now = new Date();
+
+    return this.prisma.$transaction(async (transaction) => {
+      await transaction.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          isEmailVerified: true,
+        },
+      });
+
+      await transaction.emailVerificationToken.update({
+        where: {
+          id: tokenId,
+        },
+        data: {
+          usedAt: now,
+        },
+      });
+
+      await transaction.emailVerificationToken.deleteMany({
+        where: {
+          userId,
+          usedAt: null,
+          id: {
+            not: tokenId,
+          },
+        },
+      });
+    });
+  }
+
+  async recordEmailVerificationAudit(data: {
+    userId?: string;
+    email: string;
+    action: string;
+    successful: boolean;
+    failureReason?: string;
+    ipAddress?: string;
+    userAgent?: string;
+  }) {
+    return this.prisma.emailVerificationAudit.create({
+      data,
     });
   }
 }

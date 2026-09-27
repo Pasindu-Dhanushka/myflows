@@ -54,7 +54,9 @@ export const ModelName = {
   Role: 'Role',
   User: 'User',
   AuthSession: 'AuthSession',
-  LoginAudit: 'LoginAudit'
+  LoginAudit: 'LoginAudit',
+  EmailVerificationToken: 'EmailVerificationToken',
+  EmailVerificationAudit: 'EmailVerificationAudit'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -124,6 +126,33 @@ export const LoginAuditScalarFieldEnum = {
 } as const
 
 export type LoginAuditScalarFieldEnum = (typeof LoginAuditScalarFieldEnum)[keyof typeof LoginAuditScalarFieldEnum]
+
+
+export const EmailVerificationTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailVerificationTokenScalarFieldEnum = (typeof EmailVerificationTokenScalarFieldEnum)[keyof typeof EmailVerificationTokenScalarFieldEnum]
+
+
+export const EmailVerificationAuditScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  email: 'email',
+  action: 'action',
+  successful: 'successful',
+  failureReason: 'failureReason',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailVerificationAuditScalarFieldEnum = (typeof EmailVerificationAuditScalarFieldEnum)[keyof typeof EmailVerificationAuditScalarFieldEnum]
 
 
 export const SortOrder = {

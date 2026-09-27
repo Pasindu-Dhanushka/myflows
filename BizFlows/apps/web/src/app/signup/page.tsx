@@ -111,8 +111,8 @@ export default function SignUpPage() {
         return;
       }
 
-      alert("Registration successful!");
-      window.location.href = "/signin";
+      window.location.href =
+        `/verify-email-pending?email=${encodeURIComponent(email.trim())}`;
       } catch (error) {
         console.log("Could not connect to backend:", error);
         alert("Could not connect to backend");

@@ -31,21 +31,23 @@ model User {
   roleId Int
   role   Role @relation(fields: [roleId], references: [id])
 
-  authSessions AuthSession[]
-  loginAudits  LoginAudit[]
+  authSessions            AuthSession[]
+  loginAudits             LoginAudit[]
+  emailVerificationTokens EmailVerificationToken[]
+  emailVerificationAudits EmailVerificationAudit[]
 
   @@index([roleId])
 }
 
 model AuthSession {
-  id        String    @id @default(uuid()) @db.Uuid
-  userId    String    @db.Uuid
-  expiresAt DateTime
-  createdAt DateTime  @default(now())
-  revokedAt DateTime?
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @db.Uuid
+  expiresAt        DateTime
+  createdAt        DateTime  @default(now())
+  revokedAt        DateTime?
   revocationReason String?   @db.VarChar(50)
-  ipAddress String?   @db.VarChar(64)
-  userAgent String?   @db.VarChar(512)
+  ipAddress        String?   @db.VarChar(64)
+  userAgent        String?   @db.VarChar(512)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -57,6 +59,37 @@ model LoginAudit {
   id            String   @id @default(uuid()) @db.Uuid
   userId        String?  @db.Uuid
   email         String   @db.VarChar(255)
+  successful    Boolean
+  failureReason String?  @db.VarChar(100)
+  ipAddress     String?  @db.VarChar(64)
+  userAgent     String?  @db.VarChar(512)
+  createdAt     DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([email, createdAt])
+  @@index([userId, createdAt])
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique @db.VarChar(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model EmailVerificationAudit {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String?  @db.Uuid
+  email         String   @db.VarChar(255)
+  action        String   @db.VarChar(50)
   successful    Boolean
   failureReason String?  @db.VarChar(100)
   ipAddress     String?  @db.VarChar(64)
