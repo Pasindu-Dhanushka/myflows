@@ -37,13 +37,3 @@ export type AuthSession = Prisma.AuthSessionModel
  * 
  */
 export type LoginAudit = Prisma.LoginAuditModel
-/**
- * Model EmailVerificationToken
- * 
- */
-export type EmailVerificationToken = Prisma.EmailVerificationTokenModel
-/**
- * Model EmailVerificationAudit
- * 
- */
-export type EmailVerificationAudit = Prisma.EmailVerificationAuditModel

@@ -1,54 +1,106 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Req,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
-import type { Request } from 'express';
-
+import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
+import type { AuthenticatedRequest } from './auth.types';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { ResendVerificationDto } from './dto/resend-verification.dto';
-import { VerifyEmailDto } from './dto/verify-email.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async register(
-    @Body() dto: RegisterDto,
+  register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
+  }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  async login(
+    @Body() dto: LoginDto,
     @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    return this.authService.register(dto, {
+    const result = await this.authService.login(dto, {
       ipAddress: request.ip,
       userAgent: request.get('user-agent'),
     });
-  }
 
-  @Post('verify-email')
-  @HttpCode(HttpStatus.OK)
-  async verifyEmail(
-    @Body() dto: VerifyEmailDto,
-    @Req() request: Request,
-  ) {
-    return this.authService.verifyEmail(dto, {
-      ipAddress: request.ip,
-      userAgent: request.get('user-agent'),
+    response.cookie('bizflows_access_token', result.accessToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      ...(result.rememberMe ? { maxAge: result.expiresIn * 1000 } : {}),
     });
+
+    return result;
   }
 
-  @Post('resend-verification')
-  @HttpCode(HttpStatus.OK)
-  async resendVerificationEmail(
-    @Body() dto: ResendVerificationDto,
-    @Req() request: Request,
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  getCurrentUser(@Req() request: AuthenticatedRequest) {
+    return {
+      user: request.auth.user,
+      sessionId: request.auth.sessionId,
+    };
+  }
+
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  getProfile(@Req() request: AuthenticatedRequest) {
+    return this.authService.getProfile(request.auth.user.id);
+  }
+
+  @Patch('profile')
+  @UseGuards(JwtAuthGuard)
+  updateProfile(
+    @Req() request: AuthenticatedRequest,
+    @Body() dto: UpdateProfileDto,
   ) {
-    return this.authService.resendVerificationEmail(dto, {
-      ipAddress: request.ip,
-      userAgent: request.get('user-agent'),
+    return this.authService.updateProfile(request.auth.user.id, dto);
+  }
+
+  @Patch('password')
+  @UseGuards(JwtAuthGuard)
+  changePassword(
+    @Req() request: AuthenticatedRequest,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(
+      request.auth.user.id,
+      request.auth.sessionId,
+      dto,
+    );
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
+  async logout(
+    @Req() request: AuthenticatedRequest,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.authService.logout(request.auth.sessionId);
+    response.clearCookie('bizflows_access_token', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
     });
   }
 }
