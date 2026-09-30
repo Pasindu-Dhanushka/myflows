@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
+import { MailService } from '../mail/mail.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 
@@ -26,6 +27,9 @@ describe('AuthService', () => {
     findByEmailForAuthentication: jest.Mock;
     findUserRole: jest.Mock;
     createUser: jest.Mock;
+    createEmailVerificationToken: jest.Mock;
+    deleteEmailVerificationToken: jest.Mock;
+    recordEmailVerificationAudit: jest.Mock;
     findProfileById: jest.Mock;
     updateProfile: jest.Mock;
     findPasswordById: jest.Mock;
@@ -38,6 +42,13 @@ describe('AuthService', () => {
   };
   let jwtService: {
     signAsync: jest.Mock;
+  };
+  let emailVerificationService: {
+    generateToken: jest.Mock;
+    hashToken: jest.Mock;
+  };
+  let mailService: {
+    sendVerificationEmail: jest.Mock;
   };
 
   const loginContext = {
@@ -52,13 +63,16 @@ describe('AuthService', () => {
     email: 'john.doe@example.com',
     passwordHash: 'stored-password-hash',
     isActive: true,
-    isEmailVerified: false,
-    roleId: 2,
-    role: {
-      id: 2,
-      name: 'USER',
-      description: 'Standard authenticated platform user',
-    },
+    isEmailVerified: true,
+    roles: [
+      {
+        role: {
+          id: 2,
+          name: 'USER',
+          description: 'Standard authenticated platform user',
+        },
+      },
+    ],
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -69,6 +83,9 @@ describe('AuthService', () => {
       findByEmailForAuthentication: jest.fn(),
       findUserRole: jest.fn(),
       createUser: jest.fn(),
+      createEmailVerificationToken: jest.fn(),
+      deleteEmailVerificationToken: jest.fn(),
+      recordEmailVerificationAudit: jest.fn(),
       findProfileById: jest.fn(),
       updateProfile: jest.fn(),
       findPasswordById: jest.fn(),
@@ -80,10 +97,22 @@ describe('AuthService', () => {
     jwtService = {
       signAsync: jest.fn(),
     };
+    emailVerificationService = {
+      generateToken: jest.fn().mockReturnValue({
+        token: 'verification-token',
+        tokenHash: 'verification-token-hash',
+      }),
+      hashToken: jest.fn(),
+    };
+    mailService = {
+      sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
+    };
 
     authService = new AuthService(
       usersService as unknown as UsersService,
       jwtService as unknown as JwtService,
+      emailVerificationService,
+      mailService as unknown as MailService,
     );
 
     jest.clearAllMocks();
@@ -92,8 +121,14 @@ describe('AuthService', () => {
 
   it('registers a new user without exposing the password hash', async () => {
     usersService.findByEmail.mockResolvedValue(null);
-    usersService.findUserRole.mockResolvedValue(activeUser.role);
-    usersService.createUser.mockResolvedValue(activeUser);
+    usersService.findUserRole.mockResolvedValue(activeUser.roles[0].role);
+    usersService.createUser.mockResolvedValue({
+      ...activeUser,
+      isEmailVerified: false,
+    });
+    usersService.createEmailVerificationToken.mockResolvedValue({
+      id: 'verification-token-id',
+    });
     jest.mocked(argon2.hash).mockResolvedValue('stored-password-hash');
 
     const result = await authService.register({
@@ -109,7 +144,7 @@ describe('AuthService', () => {
       lastName: 'Doe',
       email: 'john.doe@example.com',
       isEmailVerified: false,
-      roleId: 2,
+      roles: ['USER'],
     });
     expect(result).not.toHaveProperty('passwordHash');
     expect(usersService.createUser).toHaveBeenCalledWith({
@@ -173,7 +208,7 @@ describe('AuthService', () => {
         sub: 'user-uuid',
         sid: 'session-uuid',
         email: 'john.doe@example.com',
-        role: 'USER',
+        roles: ['USER'],
       },
       { expiresIn: 900 },
     );
@@ -191,7 +226,7 @@ describe('AuthService', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@example.com',
-        role: 'USER',
+        roles: ['USER'],
       },
     });
   });
@@ -285,6 +320,36 @@ describe('AuthService', () => {
     expect(usersService.createLoginSession).not.toHaveBeenCalled();
   });
 
+  it('rejects and audits an account with an unverified email', async () => {
+    usersService.findByEmailForAuthentication.mockResolvedValue({
+      ...activeUser,
+      isEmailVerified: false,
+    });
+    jest.mocked(argon2.verify).mockResolvedValue(true);
+
+    await expect(
+      authService.login(
+        { email: activeUser.email, password: 'Password123!' },
+        loginContext,
+      ),
+    ).rejects.toMatchObject({
+      response: {
+        code: 'EMAIL_NOT_VERIFIED',
+        message:
+          'Verify your email address before signing in. You can request another verification email below.',
+      },
+    });
+
+    expect(usersService.recordLoginAttempt).toHaveBeenCalledWith({
+      userId: activeUser.id,
+      email: activeUser.email,
+      successful: false,
+      failureReason: 'EMAIL_NOT_VERIFIED',
+      ...loginContext,
+    });
+    expect(usersService.createLoginSession).not.toHaveBeenCalled();
+  });
+
   it('revokes the active session during logout', async () => {
     await authService.logout('session-uuid');
 
@@ -300,11 +365,12 @@ describe('AuthService', () => {
       isEmailVerified: false,
       createdAt: activeUser.createdAt,
       updatedAt: activeUser.updatedAt,
+      roles: activeUser.roles,
     };
     usersService.findProfileById.mockResolvedValue(profile);
 
     await expect(authService.getProfile(activeUser.id)).resolves.toEqual({
-      user: profile,
+      user: { ...profile, roles: ['USER'] },
     });
   });
 
@@ -314,6 +380,7 @@ describe('AuthService', () => {
       firstName: 'Jane',
       lastName: 'Smith',
       email: activeUser.email,
+      roles: activeUser.roles,
     });
 
     const result = await authService.updateProfile(activeUser.id, {

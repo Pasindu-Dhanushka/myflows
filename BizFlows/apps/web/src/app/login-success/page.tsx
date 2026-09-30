@@ -12,6 +12,7 @@ export default function LoginSuccessPage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
+  const [roles, setRoles] = useState<string[]>([]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -29,6 +30,8 @@ export default function LoginSuccessPage() {
           return;
         }
 
+        const payload = (await response.json()) as { user: { roles: string[] } };
+        setRoles(payload.user.roles);
         setCheckingAuth(false);
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") {
@@ -94,9 +97,17 @@ export default function LoginSuccessPage() {
               My Profile
             </Link>
 
-            <button className="signin-main-button" type="button">
-              Workflow Builder
-            </button>
+            {(roles.includes("USER") || roles.includes("OWNER")) && (
+              <Link className="signin-main-button" href="/workflow-builder">
+                Workflow Builder
+              </Link>
+            )}
+
+            {(roles.includes("ADMIN") || roles.includes("OWNER")) && (
+              <Link className="signin-main-button" href="/administration">
+                Role Management
+              </Link>
+            )}
 
             {logoutError && (
               <p className="field-message error" role="alert">

@@ -425,10 +425,6 @@ export type AuthSessionUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.AuthSessionScalarWhereInput | Prisma.AuthSessionScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type AuthSessionCreateWithoutUserInput = {
   id?: string
   expiresAt: Date | string

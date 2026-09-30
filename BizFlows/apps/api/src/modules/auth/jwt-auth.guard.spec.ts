@@ -17,9 +17,7 @@ describe('JwtAuthGuard', () => {
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
-      role: {
-        name: 'USER',
-      },
+      roles: [{ role: { name: 'USER' } }],
     },
   };
 
@@ -70,7 +68,7 @@ describe('JwtAuthGuard', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@example.com',
-        role: 'USER',
+        roles: ['USER'],
       },
     });
   });

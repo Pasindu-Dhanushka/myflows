@@ -14,7 +14,7 @@ model Role {
   name        String  @unique @db.VarChar(50)
   description String? @db.VarChar(255)
 
-  users User[]
+  users UserRole[]
 }
 
 model User {
@@ -28,24 +28,90 @@ model User {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  roleId Int
-  role   Role @relation(fields: [roleId], references: [id])
+  roles UserRole[]
 
-  authSessions AuthSession[]
-  loginAudits  LoginAudit[]
+  authSessions            AuthSession[]
+  loginAudits             LoginAudit[]
+  passwordResetTokens     PasswordResetToken[]
+  passwordResetAudits     PasswordResetAudit[]
+  emailVerificationTokens EmailVerificationToken[]
+  emailVerificationAudits EmailVerificationAudit[]
+  workflows               Workflow[]
+  roleChangesMade         RoleAudit[] @relation("RoleAuditActor")
+  roleChangesReceived     RoleAudit[] @relation("RoleAuditTarget")
+}
 
+model UserRole {
+  userId     String   @db.Uuid
+  roleId     Int
+  assignedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
   @@index([roleId])
 }
 
+model RoleAudit {
+  id            String   @id @default(uuid()) @db.Uuid
+  actorUserId   String   @db.Uuid
+  targetUserId  String   @db.Uuid
+  action        String   @db.VarChar(50)
+  previousRoles String[]
+  newRoles      String[]
+  createdAt     DateTime @default(now())
+
+  actor  User @relation("RoleAuditActor", fields: [actorUserId], references: [id], onDelete: Restrict)
+  target User @relation("RoleAuditTarget", fields: [targetUserId], references: [id], onDelete: Restrict)
+
+  @@index([createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([targetUserId, createdAt])
+}
+
+model Workflow {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(150)
+  definition  Json
+  createdById String   @db.Uuid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User          @relation(fields: [createdById], references: [id])
+  runs      WorkflowRun[]
+
+  @@index([createdById])
+}
+
+model WorkflowRun {
+  id          String            @id @default(uuid()) @db.Uuid
+  workflowId  String            @db.Uuid
+  status      WorkflowRunStatus
+  input       Json
+  output      Json
+  startedAt   DateTime          @default(now())
+  completedAt DateTime?
+
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+}
+
+enum WorkflowRunStatus {
+  COMPLETED
+  FAILED
+}
+
 model AuthSession {
-  id        String    @id @default(uuid()) @db.Uuid
-  userId    String    @db.Uuid
-  expiresAt DateTime
-  createdAt DateTime  @default(now())
-  revokedAt DateTime?
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @db.Uuid
+  expiresAt        DateTime
+  createdAt        DateTime  @default(now())
+  revokedAt        DateTime?
   revocationReason String?   @db.VarChar(50)
-  ipAddress String?   @db.VarChar(64)
-  userAgent String?   @db.VarChar(512)
+  ipAddress        String?   @db.VarChar(64)
+  userAgent        String?   @db.VarChar(512)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -57,6 +123,72 @@ model LoginAudit {
   id            String   @id @default(uuid()) @db.Uuid
   userId        String?  @db.Uuid
   email         String   @db.VarChar(255)
+  successful    Boolean
+  failureReason String?  @db.VarChar(100)
+  ipAddress     String?  @db.VarChar(64)
+  userAgent     String?  @db.VarChar(512)
+  createdAt     DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([email, createdAt])
+  @@index([userId, createdAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  tokenHash String   @unique @db.VarChar(64)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  usedAt    DateTime?
+  revokedAt DateTime?
+  requestIp String?  @db.VarChar(64)
+  userAgent String?  @db.VarChar(512)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([expiresAt])
+}
+
+model PasswordResetAudit {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String?  @db.Uuid
+  email         String?  @db.VarChar(255)
+  action        String   @db.VarChar(50)
+  successful    Boolean
+  failureReason String?  @db.VarChar(100)
+  ipAddress     String?  @db.VarChar(64)
+  userAgent     String?  @db.VarChar(512)
+  createdAt     DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([action, email, createdAt])
+  @@index([action, ipAddress, createdAt])
+  @@index([userId, createdAt])
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  tokenHash String   @unique @db.VarChar(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model EmailVerificationAudit {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String?  @db.Uuid
+  email         String   @db.VarChar(255)
+  action        String   @db.VarChar(50)
   successful    Boolean
   failureReason String?  @db.VarChar(100)
   ipAddress     String?  @db.VarChar(64)

@@ -5,9 +5,11 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/database/prisma.service';
+import { MailService } from '../src/modules/mail/mail.service';
 
 describe('Authentication (e2e)', () => {
   type ErrorResponse = {
+    code?: string;
     message: string;
   };
 
@@ -20,7 +22,7 @@ describe('Authentication (e2e)', () => {
       email: string;
       firstName: string;
       lastName: string;
-      role: string;
+      roles: string[];
     };
   };
 
@@ -28,7 +30,7 @@ describe('Authentication (e2e)', () => {
     sessionId: string;
     user: {
       email: string;
-      role: string;
+      roles: string[];
     };
   };
 
@@ -49,7 +51,13 @@ describe('Authentication (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(MailService)
+      .useValue({
+        sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+        sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(
@@ -91,6 +99,23 @@ describe('Authentication (e2e)', () => {
       })
       .expect(201);
 
+    const unverifiedLoginResponse = await agent
+      .post('/auth/login')
+      .send({ email, password })
+      .expect(403);
+    const unverifiedLoginBody =
+      unverifiedLoginResponse.body as unknown as ErrorResponse;
+    expect(unverifiedLoginBody).toMatchObject({
+      code: 'EMAIL_NOT_VERIFIED',
+      message:
+        'Verify your email address before signing in. You can request another verification email below.',
+    });
+
+    await prisma.user.update({
+      where: { email },
+      data: { isEmailVerified: true },
+    });
+
     const invalidLoginResponse = await agent
       .post('/auth/login')
       .send({ email, password: 'IncorrectPassword!' })
@@ -130,7 +155,7 @@ describe('Authentication (e2e)', () => {
       email,
       firstName: 'Login',
       lastName: 'Tester',
-      role: 'USER',
+      roles: ['USER'],
     });
 
     const cookies = loginResponse.headers['set-cookie'];
@@ -254,7 +279,7 @@ describe('Authentication (e2e)', () => {
     const currentUserResponse = await agent.get('/auth/me').expect(200);
     const currentUserBody =
       currentUserResponse.body as unknown as CurrentUserResponse;
-    expect(currentUserBody.user).toMatchObject({ email, role: 'USER' });
+    expect(currentUserBody.user).toMatchObject({ email, roles: ['USER'] });
     expect(currentUserBody.sessionId).toBe(loginBody.session.id);
 
     await agent.post('/auth/logout').expect(204);
@@ -275,8 +300,9 @@ describe('Authentication (e2e)', () => {
       orderBy: { createdAt: 'asc' },
     });
 
-    expect(audits).toHaveLength(6);
+    expect(audits).toHaveLength(7);
     expect(audits.map((audit) => audit.successful)).toEqual([
+      false,
       false,
       true,
       true,
@@ -284,6 +310,7 @@ describe('Authentication (e2e)', () => {
       false,
       true,
     ]);
-    expect(audits[0].failureReason).toBe('INVALID_CREDENTIALS');
+    expect(audits[0].failureReason).toBe('EMAIL_NOT_VERIFIED');
+    expect(audits[1].failureReason).toBe('INVALID_CREDENTIALS');
   });
 });

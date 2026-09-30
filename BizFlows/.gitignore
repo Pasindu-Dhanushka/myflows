@@ -55,3 +55,6 @@ prisma/*.db-journal
 # Local storage
 storage/*
 !storage/.gitkeep
+
+# Prisma generated client
+/apps/api/generated/prisma/

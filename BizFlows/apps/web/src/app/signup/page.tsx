@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 function SignUpLogo() {
   return (
@@ -75,6 +76,7 @@ function getStrengthLabel(score: number) {
 }
 
 export default function SignUpPage() {
+  const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -111,8 +113,9 @@ export default function SignUpPage() {
         return;
       }
 
-      alert("Registration successful!");
-      window.location.href = "/signin";
+      router.push(
+        `/verify-email-pending?email=${encodeURIComponent(email.trim())}`,
+      );
       } catch (error) {
         console.log("Could not connect to backend:", error);
         alert("Could not connect to backend");

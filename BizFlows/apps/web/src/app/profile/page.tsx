@@ -13,6 +13,7 @@ type Profile = {
   lastName: string;
   email: string;
   isEmailVerified: boolean;
+  roles: string[];
 };
 
 type ProfileResponse = {
@@ -328,9 +329,15 @@ export default function ProfilePage() {
                 </label>
 
                 {profile && (
-                  <p className="signin-footer-note">
-                    Email verified: {profile.isEmailVerified ? "Yes" : "No"}
-                  </p>
+                  <div className="profile-meta">
+                    <p className="signin-footer-note">
+                      Email verified: {profile.isEmailVerified ? "Yes" : "No"}
+                    </p>
+                    <div className="profile-roles" aria-label="Your roles">
+                      <span>Roles</span>
+                      <div>{profile.roles.map((role) => <span className="role-badge" key={role}>{role[0] + role.slice(1).toLowerCase()}</span>)}</div>
+                    </div>
+                  </div>
                 )}
 
                 {profileError && (

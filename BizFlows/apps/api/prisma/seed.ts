@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client';
+import * as argon2 from 'argon2';
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -17,29 +18,50 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
-  await prisma.role.upsert({
-    where: { name: 'PLATFORM_ADMIN' },
+  const roleDescriptions = {
+    OWNER: 'Owner with full platform access',
+    ADMIN: 'Administrator with user and role management access',
+    USER: 'Standard authenticated platform user',
+  } as const;
+
+  const roles = await Promise.all(
+    Object.entries(roleDescriptions).map(([name, description]) =>
+      prisma.role.upsert({
+        where: { name },
+        update: { description },
+        create: { name, description },
+      }),
+    ),
+  );
+  const adminRole = roles.find((role) => role.name === 'ADMIN');
+  if (!adminRole) throw new Error('ADMIN role could not be seeded.');
+
+  const passwordHash = await argon2.hash('Admin@123');
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@gmail.com' },
     update: {
-      description: 'Platform administrator with system-level access',
+      firstName: 'System',
+      lastName: 'Admin',
+      passwordHash,
+      isActive: true,
+      isEmailVerified: true,
     },
     create: {
-      name: 'PLATFORM_ADMIN',
-      description: 'Platform administrator with system-level access',
+        firstName: 'System',
+        lastName: 'Admin',
+        email: 'admin@gmail.com',
+        passwordHash,
+        isActive: true,
+        isEmailVerified: true,
     },
   });
-
-  await prisma.role.upsert({
-    where: { name: 'USER' },
-    update: {
-      description: 'Standard authenticated platform user',
-    },
-    create: {
-      name: 'USER',
-      description: 'Standard authenticated platform user',
-    },
+  await prisma.userRole.upsert({
+    where: { userId_roleId: { userId: admin.id, roleId: adminRole.id } },
+    update: {},
+    create: { userId: admin.id, roleId: adminRole.id },
   });
 
-  console.log('Initial roles seeded successfully.');
+  console.log('System roles and development admin seeded successfully.');
 }
 
 main()

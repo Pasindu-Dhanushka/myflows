@@ -4,7 +4,7 @@ export type AccessTokenPayload = {
   sub: string;
   sid: string;
   email: string;
-  role: string;
+  roles: string[];
   iat?: number;
   exp?: number;
 };
@@ -14,7 +14,7 @@ export type AuthenticatedUser = {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
+  roles: string[];
 };
 
 export interface AuthenticatedRequest extends Request {

@@ -50,6 +50,26 @@ export type Role = Prisma.RoleModel
  */
 export type User = Prisma.UserModel
 /**
+ * Model UserRole
+ * 
+ */
+export type UserRole = Prisma.UserRoleModel
+/**
+ * Model RoleAudit
+ * 
+ */
+export type RoleAudit = Prisma.RoleAuditModel
+/**
+ * Model Workflow
+ * 
+ */
+export type Workflow = Prisma.WorkflowModel
+/**
+ * Model WorkflowRun
+ * 
+ */
+export type WorkflowRun = Prisma.WorkflowRunModel
+/**
  * Model AuthSession
  * 
  */
@@ -59,3 +79,23 @@ export type AuthSession = Prisma.AuthSessionModel
  * 
  */
 export type LoginAudit = Prisma.LoginAuditModel
+/**
+ * Model PasswordResetToken
+ * 
+ */
+export type PasswordResetToken = Prisma.PasswordResetTokenModel
+/**
+ * Model PasswordResetAudit
+ * 
+ */
+export type PasswordResetAudit = Prisma.PasswordResetAuditModel
+/**
+ * Model EmailVerificationToken
+ * 
+ */
+export type EmailVerificationToken = Prisma.EmailVerificationTokenModel
+/**
+ * Model EmailVerificationAudit
+ * 
+ */
+export type EmailVerificationAudit = Prisma.EmailVerificationAuditModel

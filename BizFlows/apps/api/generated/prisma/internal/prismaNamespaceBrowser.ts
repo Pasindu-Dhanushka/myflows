@@ -53,8 +53,16 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Role: 'Role',
   User: 'User',
+  UserRole: 'UserRole',
+  RoleAudit: 'RoleAudit',
+  Workflow: 'Workflow',
+  WorkflowRun: 'WorkflowRun',
   AuthSession: 'AuthSession',
-  LoginAudit: 'LoginAudit'
+  LoginAudit: 'LoginAudit',
+  PasswordResetToken: 'PasswordResetToken',
+  PasswordResetAudit: 'PasswordResetAudit',
+  EmailVerificationToken: 'EmailVerificationToken',
+  EmailVerificationAudit: 'EmailVerificationAudit'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -91,11 +99,57 @@ export const UserScalarFieldEnum = {
   isActive: 'isActive',
   isEmailVerified: 'isEmailVerified',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  roleId: 'roleId'
+  updatedAt: 'updatedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const UserRoleScalarFieldEnum = {
+  userId: 'userId',
+  roleId: 'roleId',
+  assignedAt: 'assignedAt'
+} as const
+
+export type UserRoleScalarFieldEnum = (typeof UserRoleScalarFieldEnum)[keyof typeof UserRoleScalarFieldEnum]
+
+
+export const RoleAuditScalarFieldEnum = {
+  id: 'id',
+  actorUserId: 'actorUserId',
+  targetUserId: 'targetUserId',
+  action: 'action',
+  previousRoles: 'previousRoles',
+  newRoles: 'newRoles',
+  createdAt: 'createdAt'
+} as const
+
+export type RoleAuditScalarFieldEnum = (typeof RoleAuditScalarFieldEnum)[keyof typeof RoleAuditScalarFieldEnum]
+
+
+export const WorkflowScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  definition: 'definition',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WorkflowScalarFieldEnum = (typeof WorkflowScalarFieldEnum)[keyof typeof WorkflowScalarFieldEnum]
+
+
+export const WorkflowRunScalarFieldEnum = {
+  id: 'id',
+  workflowId: 'workflowId',
+  status: 'status',
+  input: 'input',
+  output: 'output',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt'
+} as const
+
+export type WorkflowRunScalarFieldEnum = (typeof WorkflowRunScalarFieldEnum)[keyof typeof WorkflowRunScalarFieldEnum]
 
 
 export const AuthSessionScalarFieldEnum = {
@@ -126,12 +180,76 @@ export const LoginAuditScalarFieldEnum = {
 export type LoginAuditScalarFieldEnum = (typeof LoginAuditScalarFieldEnum)[keyof typeof LoginAuditScalarFieldEnum]
 
 
+export const PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  usedAt: 'usedAt',
+  revokedAt: 'revokedAt',
+  requestIp: 'requestIp',
+  userAgent: 'userAgent'
+} as const
+
+export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
+
+
+export const PasswordResetAuditScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  email: 'email',
+  action: 'action',
+  successful: 'successful',
+  failureReason: 'failureReason',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetAuditScalarFieldEnum = (typeof PasswordResetAuditScalarFieldEnum)[keyof typeof PasswordResetAuditScalarFieldEnum]
+
+
+export const EmailVerificationTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailVerificationTokenScalarFieldEnum = (typeof EmailVerificationTokenScalarFieldEnum)[keyof typeof EmailVerificationTokenScalarFieldEnum]
+
+
+export const EmailVerificationAuditScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  email: 'email',
+  action: 'action',
+  successful: 'successful',
+  failureReason: 'failureReason',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailVerificationAuditScalarFieldEnum = (typeof EmailVerificationAuditScalarFieldEnum)[keyof typeof EmailVerificationAuditScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -148,4 +266,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

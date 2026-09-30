@@ -9,7 +9,9 @@
 * 🟢 You can import this file directly.
 */
 
+export const WorkflowRunStatus = {
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+} as const
 
-
-// This file is empty because there are no enums in the schema.
-export {}
+export type WorkflowRunStatus = (typeof WorkflowRunStatus)[keyof typeof WorkflowRunStatus]

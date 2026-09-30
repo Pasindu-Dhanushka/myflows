@@ -8,6 +8,7 @@ import { FormEvent, useMemo, useState } from "react";
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 type ApiError = {
+  code?: string;
   message?: string | string[];
 };
 
@@ -18,6 +19,7 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
+  const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const emailIsValid = useMemo(
@@ -32,6 +34,7 @@ export default function SignInPage() {
     if (!canSubmit) return;
 
     setError("");
+    setNeedsEmailVerification(false);
     setIsSubmitting(true);
 
     try {
@@ -49,6 +52,7 @@ export default function SignInPage() {
         const message = Array.isArray(payload.message)
           ? payload.message.join(" ")
           : payload.message;
+        setNeedsEmailVerification(payload.code === "EMAIL_NOT_VERIFIED");
         setError(message ?? "Login failed. Please check your credentials.");
         return;
       }
@@ -102,6 +106,8 @@ export default function SignInPage() {
             <label>
               <span className="password-label-row">
                 <span>Password</span>
+
+                <Link href="/forgot-password">Forgot password?</Link>
               </span>
               <span className="signin-input-wrap">
                 <LockKeyhole size={18} />
@@ -133,13 +139,19 @@ export default function SignInPage() {
             </label>
 
             {error && (
-              <p
-                className="field-message error"
-                role="alert"
-                aria-live="polite"
-              >
-                {error}
-              </p>
+              <div role="alert" aria-live="polite">
+                <p className="field-message error">{error}</p>
+
+                {needsEmailVerification && (
+                  <Link
+                    href={`/verify-email-pending?email=${encodeURIComponent(
+                      email.trim(),
+                    )}`}
+                  >
+                    Resend verification email
+                  </Link>
+                )}
+              </div>
             )}
 
             <button

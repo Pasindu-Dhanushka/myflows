@@ -6,26 +6,40 @@ import {
   HttpStatus,
   Patch,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
+
 import { AuthService } from './auth.service';
 import type { AuthenticatedRequest } from './auth.types';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ValidatePasswordResetTokenDto } from './dto/validate-password-reset-token.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { PasswordResetService } from './password-reset.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly passwordResetService: PasswordResetService,
+  ) {}
 
   @Post('register')
-  register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  async register(@Body() dto: RegisterDto, @Req() request: Request) {
+    return this.authService.register(dto, {
+      ipAddress: request.ip,
+      userAgent: request.get('user-agent'),
+    });
   }
 
   @Post('login')
@@ -45,10 +59,61 @@ export class AuthController {
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      ...(result.rememberMe ? { maxAge: result.expiresIn * 1000 } : {}),
+      ...(result.rememberMe
+        ? {
+            maxAge: result.expiresIn * 1000,
+          }
+        : {}),
     });
 
     return result;
+  }
+
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  async verifyEmail(@Body() dto: VerifyEmailDto, @Req() request: Request) {
+    return this.authService.verifyEmail(dto, {
+      ipAddress: request.ip,
+      userAgent: request.get('user-agent'),
+    });
+  }
+
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  async resendVerificationEmail(
+    @Body() dto: ResendVerificationDto,
+    @Req() request: Request,
+  ) {
+    return this.authService.resendVerificationEmail(dto, {
+      ipAddress: request.ip,
+      userAgent: request.get('user-agent'),
+    });
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.ACCEPTED)
+  requestPasswordReset(
+    @Body() dto: ForgotPasswordDto,
+    @Req() request: Request,
+  ) {
+    return this.passwordResetService.requestReset(dto, {
+      ipAddress: request.ip,
+      userAgent: request.get('user-agent'),
+    });
+  }
+
+  @Get('reset-password/validate')
+  validatePasswordResetToken(@Query() dto: ValidatePasswordResetTokenDto) {
+    return this.passwordResetService.validateResetToken(dto);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  resetPassword(@Body() dto: ResetPasswordDto, @Req() request: Request) {
+    return this.passwordResetService.resetPassword(dto, {
+      ipAddress: request.ip,
+      userAgent: request.get('user-agent'),
+    });
   }
 
   @Get('me')
@@ -96,6 +161,7 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     await this.authService.logout(request.auth.sessionId);
+
     response.clearCookie('bizflows_access_token', {
       httpOnly: true,
       sameSite: 'lax',

@@ -60,7 +60,7 @@ export class JwtAuthGuard implements CanActivate {
         firstName: session.user.firstName,
         lastName: session.user.lastName,
         email: session.user.email,
-        role: session.user.role.name,
+        roles: session.user.roles.map(({ role }) => role.name),
       },
     };
 
